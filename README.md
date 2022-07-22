@@ -1,5 +1,7 @@
 <h1>Certified Kubernetes Security Specialist (CKS) Exercises </h1>
 
+> **_NOTE:_**  WORK IN PROGRESS. MORE CONTENTS TO COME. EVERYTHING NEEDS TO BE VERIFIED.
+
 <h2>Introduction </h2>
 
 This is a set of instructions, exercises, and demos used to prepare for the CKS certificate offered by the Linux Foundation. You'll also find information regarding cost, exam objectives, duration, etc in this documentation. 

@@ -46,7 +46,7 @@ kubectl api-resources --namespaced=false
 <h3> RoleBinding vs ClusterRoleBinding</h3>
 <p> Once roles or clusterRoles are defined, you can create roleBinding or ClusterRoleBinding to bind the set of permissions to something (i.e users, serviceAccounts). Similarly to the bullet above, roleBinding only applies to resources in one namespace. ClusterRoleBinding can bind to cluster resources, non-namespaces resources, and all namespaces</p>
 
-<h3> Create a role named secret-maintainer that allows a user to get, watch, list all secrets in the qa namespace</h3>
+<h4> Create a role named secret-maintainer that allows a user to get, watch, list all secrets in the qa namespace</h4>
 <details><summary>Answer</summary>
 
 ```bash
@@ -182,7 +182,7 @@ kubectl create clusterrolebinding cluster-deployment-killer --clusterrole deploy
 
 # bind clusterRole deployment-killer to user Tim. 
 # remember that user Tim should only be allowed to delete deployments in the developer namespace
-kubectl create rolebinding developer-deployment-killer --clusterrole deployment-killer --user=tim 
+kubectl create rolebinding developer-deployment-killer --clusterrole deployment-killer --user=tim -n developer
 # verify that James can delete deployments in any namespaces 
 kubectl  auth can-i delete deploy --as james -A   # all namespaces
 kubectl auth can-i delete deploy --as james -n developer
@@ -202,7 +202,7 @@ kubectl auth can-i delete deploy --as tim -n developer
 
 <p> serviceAccounts are easy to understand and they are actual resources in a k8s cluster. We'll have some examples on serviceAccounts. However, let us zoom in a bit on k8s externally managed users</p>
 
-<p> As mentioned above a user is someone that has a cert and a key. A client cert must be signed by the cluster's certificate authority (CA). te username must be under common Name /CN=james</p>
+<p> As mentioned above a user is someone that has a cert and a key. A client cert must be signed by the cluster's certificate authority (CA). te username must be under common Name /CN=james.</p>
 
 
 
