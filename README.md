@@ -20,7 +20,8 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 <h2>Learning tools</h2>
 
 1. ckad exercises: https://github.com/dgkanatsios/CKAD-exercises
-1. udemy: 
+1. linux foundation: https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/
+1. udemy: https://www.udemy.com/course/certified-kubernetes-security-specialist 
 1. Install Kubernetes cluster: https://github.com/kelseyhightower/kubernetes-the-hard-way
 
 <h2>Domains & Competencies</h2>
@@ -31,3 +32,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 * [Minimize Microservice Vulnerabilities 20%](https://github.com/franchev/CKS-Exercises/blob/main/minimize_microservice_vulnerabilities.md)
 * [Supply Chain Security 20%](https://github.com/franchev/CKS-Exercises/blob/main/supply_chain_security.md)
 * [Monitoring, Logging and Runtime Secury 20%](https://github.com/franchev/CKS-Exercises/blob/main/monitoring_logging_runtime_security.md)
+
+<h2> Practice_exams folder</h2>
+
+<p> In this folder, you'll find a list of practice exams that contain multiple questions that you can use to prepare for the exam. My advise is to try to time yourself. Set a duration of 2 hours for eact practice exam and see how well you do, before you reveal the answers for each question. REMEMBER, THIS IS JUST A PRACTICE EXAM AND MIGHT NOT SHOW UP AT ALL ON THE REAL EXAM.</p>
