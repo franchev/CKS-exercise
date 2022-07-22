@@ -39,7 +39,6 @@ kubectl api-resources --namespaced=false
 
 <h3> Role VS ClusterRole</h3>
 <p> Both Role and clusterRole set permissions. They have rules that defines which actions are being allowed against a resource (i.e get pods). However, they work at different levels. Roles are tied to a namespace. ClusterRoles can apply to the entire cluster (meaning all namespaces, all resources, all non-namespace resources). BE CAREFUL WITH CLUSTERROLES, THIS GIVES THE USER CLUSTER LEVEL POWER<p> 
-<h3> fill with question</h3>
 
 <h3> RBAC Permission are additive </h3>
 <p> RBAC offers you the option to follow least privilege security model. By specifiying that is allowed, will automatically deny everything else. Permission are additive. For example if a user has been bound to multiple roles or clusterRoles, they will inherit all the permissions combined from these roles and clusterRoles.</p>
@@ -69,7 +68,7 @@ kubectl apply -f secret-maintainer.yaml
 
 </details>
 
-<h3> Create a clusterRole named pod-reader that allows user to perform "get", "watch" and "list" on pods</h3>
+<h4> Create a clusterRole named pod-reader that allows user to perform "get", "watch" and "list" on pods</h4>
 <details><summary>Answer</summary>
 
 ```bash
@@ -91,11 +90,11 @@ kubectl apply -f secret-maintainer.yaml
 
 </details>
 
-<h3> Scenario 1: 
+<h4> Scenario 1: 
 <li>Create a namespace named qa</li>
 <li> User James should only "get" and "list" secrets in the qa namespace</li>
 </li> Verify that authentication is setup properly using the auth can-i command</li>
-</h3>
+</h4>
 <details><summary>Answer</summary>
 
 ```bash
@@ -165,12 +164,12 @@ kubectl apply -f rolebinding-secret-readers.yaml
 
 </details>
 
-<h3> Scenario 2: 
+<h4> Scenario 2: 
 <li>Create a ClusterRole named deployment-killer that will allow users to delete deployments</li>
 <li> User James should be allowed to delete deployments in all namespaces</li>
 <li> User Tim can only delete deployments in the developer namespace</li>
 <li> Using the auth can-i command, verify that the permissions are set properly</li>
-</h3>
+</h4>
 <details><summary>Answer</summary>
 
 ```bash
@@ -185,16 +184,25 @@ kubectl create clusterrolebinding cluster-deployment-killer --clusterrole deploy
 # remember that user Tim should only be allowed to delete deployments in the developer namespace
 kubectl create rolebinding developer-deployment-killer --clusterrole deployment-killer --user=tim 
 # verify that James can delete deployments in any namespaces 
-kubectl  auth can-i delete deploy --as james -n qa
+kubectl  auth can-i delete deploy --as james -A   # all namespaces
 kubectl auth can-i delete deploy --as james -n developer
 
 # verify that Tim can only delete deployments in the developer namespace
-kubectl  auth can-i delete deploy --as tim -n qa
+kubectl  auth can-i delete deploy --as tim -A
 kubectl auth can-i delete deploy --as tim -n developer
 
 ```
 
 </details>
+
+
+<h3> serviceAccount VS User </h3>
+<li> A serviceAccount is an account that can be managed by the k8s api</li>
+<li> Actually, there are no k8s User resource. K8s assumes that a cluster-independent service manages normal users (i.e AWS, GCP, etc). In this case, a user is simply someone with a cert and key to access resources in the cluster</li> 
+
+<p> serviceAccounts are easy to understand and they are actual resources in a k8s cluster. We'll have some examples on serviceAccounts. However, let us zoom in a bit on k8s externally managed users</p>
+
+<p> As mentioned above a user is someone that has a cert and a key. A client cert must be signed by the cluster's certificate authority (CA). te username must be under common Name /CN=james</p>
 
 
 
