@@ -1,6 +1,7 @@
-<h1> Cluster Hardening 15%</h1>
+<h1> System Hardening 15%</h1>
 
-<h2>Restrict access to Kubernetes API</h2>
+<h2>Minimize host OS footprint (reduce attack surface)</h2>
+
 <p>fill with info</p>
 
 <li>fill with info</li>
@@ -17,7 +18,8 @@
 </details>
 
 
-<h2>Use Role Based Access Controls to minimize exposure</h2>
+<h2>Minimize IAM roles</h2>
+
 <p>fill with info</p>
 
 <li>fill with info</li>
@@ -33,9 +35,8 @@
 
 </details>
 
+<h2>Minimize external access to the network</h2>
 
-
-<h2>Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones </h2>
 <p>fill with info</p>
 
 <li>fill with info</li>
@@ -51,8 +52,7 @@
 
 </details>
 
-
-<h2>Update Kubernetes frequently</h2>
+<h2>Appropriately use kernel hardening tools such as AppArmor, seccomp</h2>
 
 <p>fill with info</p>
 
