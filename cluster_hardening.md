@@ -203,8 +203,130 @@ kubectl auth can-i delete deploy --as tim -n developer
 <p> serviceAccounts are easy to understand and they are actual resources in a k8s cluster. We'll have some examples on serviceAccounts. However, let us zoom in a bit on k8s externally managed users</p>
 
 <p> As mentioned above a user is someone that has a cert and a key. A client cert must be signed by the cluster's certificate authority (CA). te username must be under common Name /CN=james.</p>
+<p> Below, i've provided an example for how to generate a client cert that is signed by the cluster's CA. I will be using openssl.<p>
+
+<h4>Create a user cert for username: james to connect to a cluster</h4>
+
+```bash
+# Create key using openssl
+openssl genrsa -out james.key 2048
+
+# create certificate signing request using openssl. Press enter for each option. Except Common Name, please set that to james
+openssl req -new -key james.key -out james.csr
+
+# base64 encode james.csr request. This is needed to create the CertificateSigningRequest resource in kubernetes
+cat james.csr | base64 -w 0
+
+# Create CertificateSigningRequest resource using kubectl 
+vim james-csr.yaml
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: james
+spec:
+  groups:
+  - system:authenticated
+  request: [copy base64 encoded value from step above]
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+
+kubectl apply -f james-csr.yaml 
+
+# view csr resource in kubernets, it'll be in a pending state
+kubectl get csr
+
+# approve james certificate
+kubectl certificate approve james
+
+# copy certificate generated after approval
+kubectl get csr james -oyaml 
+
+# under status section grab certificate blob
+# base64 decode certificate
+echo "replace with certificate blob=====" | base64 -d > james.crt
+
+# add newly created certs and keys in kubectl config file. use the --embed-certs to add actual content of key and crt files in k8s config file.
+kubectl config set-credentials james --client=key=james.key --client=certificate=james.crt --embed-certs
+
+# create context to connect the kubernetes cluster to the user james
+kubectl config set-context james ==user=james --cluster=[name_of_cluster]
+
+#Test connecting as user James by switching to the james context
+kubectl config use-context james
+
+# here you get see what kind of access james has. If user james needs more access, remember you'll need to create roles or clusterRoles and bind them to the user.
+kubectl auth can-i list pods -A
+
+```
+
+<h4> Scenario 3: 
+<li> User Andrea should be allowed to list, watch, get pods from all namespaces</li>
+<li> As the administrator of the kubernetes cluster named k8s-stage, please share the certificate base64 decoded with Andrea. Also provide Andrea with a list of instruction to connect to the cluster with the certificate provided<li>
+<>
+</h4>
+<details><summary>Answer</summary>
+
+```bash
+# create clusterRole named engineer-viewer with verb=list,watch,get applied to pods resources. 
+kubectl create clusterrole engineer-viewer --verb=list,watch,get --resource=pods
+
+# bind clusterRole engineer-viewer to user andrea. 
+kubectl create clusterrolebinding engineer-viewer --clusterrole engineer-viewer --user=andrea
+
+# verify that andrea can list all pods in all namespaces
+kubectl  auth can-i get pods --as andrea -A   # all namespaces
+
+# ping Andrea, using openssl have her generate key and csr. 
+# have her share the csr file with you
+openssl genrsa -out andrea.key 2048
+# remember here to tell andrea to set the Common Name to be andrea
+openssl req -new -key andrea.key -out andrea.csr
+
+# base64 encode andrea.csr file
+cat andrea.csr | base64 -w 0
+
+#using base64 encoded andrea.csr, create kubernetes CertificateSigningRequest resource in the k8s-stage cluster
+vim andrea-csr.yaml
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: andrea
+spec:
+  groups:
+  - system:authenticated
+  request: [copy base64 encoded value from step above]
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+
+kubectl apply -f andrea-csr.yaml
+
+# approve andrea's signature request
+kubectl certificate approve andrea
+
+# grab certificate to share with andrea
+kubectl get csr andrea -o yaml
+
+# base64 decode and share with Andrea
+echo "base64decodeandreacert======" | base64 -d > andrea.crt
+
+# share decoded cert with Andrea with instruction
+# add newly created certs and keys in kubectl config file. use the --embed-certs to add actual content of key and crt files in k8s config file.
+kubectl config set-credentials andrea --client=key=andrea.key --client=certificate=andrea.crt --embed-certs
+
+# create context to connect the kubernetes cluster to the user andrea
+kubectl config set-context andrea ==user=james --cluster=k8s-stage
+
+#Test connecting as user James by switching to the james context
+kubectl config use-context andrea
+
+# here you get see what kind of access james has. If user james needs more access, remember you'll need to create roles or clusterRoles and bind them to the user.
+kubectl auth can-i list pods -A
+```
 
 
+</details>
 
 <h2>Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones </h2>
 <p>fill with info</p>

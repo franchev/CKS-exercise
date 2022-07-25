@@ -8,6 +8,10 @@ This is a set of instructions, exercises, and demos used to prepare for the CKS 
 
 For the exam, you are allowed to have one extra browser tab open, which you can use to refer to the Kubernetes official documentation. I would not advise that you rely heavily on those documentation, because you only have a limitted amount of time to finish the exam. 
 
+<h2>Exam prerequisites</h2>
+
+1. You must have a valid CKA certification
+
 <h2>Exam Detail</h2>
   
 1. Length: 2 hours
