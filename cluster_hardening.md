@@ -263,7 +263,6 @@ kubectl auth can-i list pods -A
 <h4> Scenario 3: 
 <li> User Andrea should be allowed to list, watch, get pods from all namespaces</li>
 <li> As the administrator of the kubernetes cluster named k8s-stage, please share the certificate base64 decoded with Andrea. Also provide Andrea with a list of instruction to connect to the cluster with the certificate provided<li>
-<>
 </h4>
 <details><summary>Answer</summary>
 
@@ -329,21 +328,133 @@ kubectl auth can-i list pods -A
 </details>
 
 <h2>Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones </h2>
-<p>fill with info</p>
 
-<li>fill with info</li>
-<li>fill with info</li>
+<h3> ServiceAccounts(SA) revisited</h3>
+<p>We touched briefly on serviceAccount in the RBAC section above. Now, we'll focus on it a bit more for this section. A few things to know about serviceAccounts :</p>
 
-<h3> fill with question</h3>
+<li>they are namespaced</li>
+<li>every namespace has a default ServiceAccount used by pods</li>
+<li>Can be used to talk to k8s api</li>
+
+<p>When you create a ServiceAccount(SA), it'll automatically create a kubernetes secrets that will hold the token that used by the SA to make api calls within the k8s cluster</p>
+
+
+<h4> Create a ServiceAccount named connector in the default namespace. Then create a pod using image nginx with that same name to use that serviceAccount</h4>
 
 <details><summary>Answer</summary>
 
 ```bash
-#replace with answers
+#create serviceAccount connector
+kubectl create sa connector
+
+# create pod connector using image ngnix. We have to do one small modification to the pod, so we'll generate the pod.yaml file using imperative command. We'll send that to a file. We'll modify the file to have the pod point to the connector SA, then we'll apply to the k8s cluster
+kubectl run connector --image=nginx -oyaml --dry-run=client > connector-pod.yaml
+vim connector-pod.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: connector
+  name: connector
+spec:
+  serviceAccountName: connector
+  containers:
+  - image: nginx
+    name: connector
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {} 
+
+kubectl apply -f connector-pod.yaml
+
 ```
 
 </details>
 
+<h3> Limit ServiceAccount using RBAC</h3>
+
+<p> by default, all pods use the default serviceAccount defined in their namespace. By default, this serviceAccount(default) doesn't have any permissions. With that said, if someone were to modify that serviceAccount(default) and attached some permissions to it, then all pods in that namespace would inherrit those permissions</p>
+
+<p> Using RBAC, you can bind serviceAccount to roles or clusterroles. Here's a quick example<p>
+
+<h4>Bind the connector serviceAccount to the edit clusterrole (this is a clusterrole that exists by default). Check if connector ServiceAccount can delete secrets using the auth can-i command</h4>
+
+```bash
+# check if connector serviceAccount can delete secrets
+kubectl auth can-i delete secrets --as system:serviceaccount:default:connector
+
+# create clusterrolebinding named connector and bind serviceAccount connector to clusterrole edit
+kubectl create clusterrolebinding connector --clusterrole edit --serviceaccount default:connector
+
+# now again verify if connector serviceAccount can delete secrets
+kubectl auth can-i delete secrets --as system:serviceaccount:default:connector
+```
+
+<h3>Limit mounting serviceAccount token in a pod</h3>
+
+<p> Following the least privilege concept, you shouldn't give a pod access that they don't need. Therefore, you can associate disable the mounting of a serviceAccount token on a pod. This is a very simple change. Here's a quick example doing that</p>
+
+```bash
+# let's create a service account name developer in the default namespace
+kubectl create sa developer 
+
+# let's create the definition of a pod named nginx with image nginx.
+# then we'll update the pod to use the developer sa, and we'll also disable the mounting on that sa token
+kubectl run nginx --image=nginx --dry-run=client -o yaml > nginx.yaml
+
+vim nginx.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  serviceAccountName: developer
+  automountServiceAccountToken: false
+  containers:
+  - image: nginx
+    name: nginx
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+kubectl apply nginx.yaml
+```
+
+<h4> Scenario 1
+<li>create a pod named test1 with image nginx in the default namespace</li>
+<li>run command against the pod, check if the default serviceAccount is mounted on the pod</li> 
+<li>Modify the default service account, disable auto mount of the token</li>
+<li>Reconnect to test1 pod, and check if secret associated with the serviceAccount is still mounted</li></h4>
+<details><summary>Answer</summary>
+
+```bash
+
+# create pod named test1 with image nginx in default namespace 
+kubectl run test1 --image=nginx 
+
+# run command against the pod, and check if serviceAccount secret is mounted
+k exec test1 -- mount | grep secret
+tmpfs on /run/secrets/kubernetes.io/serviceaccount type tmpfs (ro,relatime)
+
+# let's edit the default service account and disable auto mount of token. Add automountServiceAccountToken: 
+kubectl edit sa default
+
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: false
+...
+
+# run command against the pod, and check if serviceAccount secret is mounted
+k exec test1 -- mount | grep secret
+```
+
+</details>
 
 <h2>Update Kubernetes frequently</h2>
 

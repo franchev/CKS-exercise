@@ -10,3 +10,6 @@ kubectl get pods -v 6 --as=system:serviceaccount:default:mysvcaccount1
 
 # impersonate user james to see if it can list secrets
 kubectl auth can-i get secrets --as james -n qa
+
+# check if a serviceAccount has permission to perform an action (i.e delete secrets)
+kubectl auth can-i delete secrets --as system:serviceaccount:default:default
