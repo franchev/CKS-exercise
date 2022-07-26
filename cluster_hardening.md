@@ -451,7 +451,9 @@ automountServiceAccountToken: false
 ...
 
 # run command against the pod, and check if serviceAccount secret is mounted
-k exec test1 -- mount | grep secret
+kubectl exec test1 -- mount | grep secret
+kubectl exec test1 -- cat: /var/run/secrets/kubernetes.io/serviceaccount/token
+
 ```
 
 </details>
