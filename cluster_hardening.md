@@ -1,23 +1,84 @@
 <h1> Cluster Hardening 15%</h1>
 
 <h2>Restrict access to Kubernetes API</h2>
-<p>fill with info</p>
 
-<li>fill with info</li>
-<li>fill with info</li>
+<h3>List of external links for this domain</h3>
 
-<h3> fill with question</h3>
+<li>https://kubernetes.io/docs/concepts/security/controlling-access/</li>
 
-<details><summary>Answer</summary>
+<p>Kubernetes API is the one of the most important aspect of kubernetes. All requests are api requests which goes through this workflow:</p>
+<li>Authentication: verifies who you are (either a user, serviceAccount, or coming annonymously)</li>
+<li>Authorization: verifies if the user or SA has access to perform the action that they are requesting</li>
+<li>Admission Control: validates limits that are set in the cluster (i.e users are only allowed to create up to 100 pods). Admission control can be defined by the kubernetes administrator. </li>
+
+<p> When securing your kubernetes cluster, you should think of a list of restrictions to apply. For example:</p>
+<li>Do not allow annonymous requests</li>
+<li>Close ports that are deemed to be insecure</li>
+<li>Don't expose APIServer outside of your network</li>
+<li>Restrict access from nodes to API(NodeRestriction)</li>
+<li>Manage access through RBAC (follow least privilege model)</li>
+<li>Prevent pods from accessing the API</li>
+
+<h3> Anonymous Access</h3>
+
+<p> You can disable anonymous requests in your k8s cluster by running. This would make your cluster more secure. You can do that by login to your kubernetes master node and follow steps below<p>
 
 ```bash
-#replace with answers
+
+# first connect to your master node
+
+# check if you can connect the api anonymously
+curl https://localhost:6443 -k
+
+# under the command section add: - --anonymous-auth=false
+vim /etc/kubernetes/manifests/kube-apiserver.yaml
+
+# wait for changes to apply. Making this change will create a new api pod
+kubectl -n kube-system get pod | grep api
+
+# rerun curl command to verify
+curl https://localhost:6443 -k
+
+# the api server actually needs to make anonymous calls for its livenessProbe check, therefore we need to re-enable anonymous-auth. under command block, remove: - --anonymous-auth=false
+vim /etc/kubernetes/manifests/kube-apiserver.yaml
+
 ```
+
+<h3> NodeRestriction AdmissionController</h3>
+
+<p>This admission controller limits the Node and Pod objects a kubelet can modify. In order to be limited by this admission controller, kubelets must use credentials in the system:nodes group, with a username in the form system:node:<nodeName>. Such kubelets will only be allowed to modify their own Node API object, and only modify Pod API objects that are bound to their node. kubelets are not allowed to update or remove taints from their Node API object.
+
+The NodeRestriction admission plugin prevents kubelets from deleting their Node API object, and enforces kubelet modification of labels under the kubernetes.io/ or k8s.io/ prefixes as follows:
+
+Prevents kubelets from adding/removing/updating labels with a node-restriction.kubernetes.io/ prefix. This label prefix is reserved for administrators to label their Node objects for workload isolation purposes, and kubelets will not be allowed to modify labels with that prefix.
+Allows kubelets to add/remove/update these labels and label prefixes:
+kubernetes.io/hostname
+kubernetes.io/arch
+kubernetes.io/os
+beta.kubernetes.io/instance-type
+node.kubernetes.io/instance-type
+failure-domain.beta.kubernetes.io/region (deprecated)
+failure-domain.beta.kubernetes.io/zone (deprecated)
+topology.kubernetes.io/region
+topology.kubernetes.io/zone
+kubelet.kubernetes.io/-prefixed labels
+node.kubernetes.io/-prefixed labels
+Use of any other labels under the kubernetes.io or k8s.io prefixes by kubelets is reserved, and may be disallowed or allowed by the NodeRestriction admission plugin in the future.
+
+Future versions may add additional restrictions to ensure kubelets have the minimal set of permissions required to operate correctly.
+
+</p>
+
+
 
 </details>
 
 
 <h2>Use Role Based Access Controls to minimize exposure</h2>
+
+<h3>Link to documentation on RBAC</h3>
+
+<li>https://kubernetes.io/docs/reference/access-authn-authz/rbac/</li>
 
 <h3> Role Based Access Control (RBAC)</h3>
 <li>a method of regulating access to computer or network resources based on the roles of individual users within your organization."</li>
@@ -460,17 +521,31 @@ kubectl exec test1 -- cat: /var/run/secrets/kubernetes.io/serviceaccount/token
 
 <h2>Update Kubernetes frequently</h2>
 
-<p>fill with info</p>
+<h3> Upgrade your kubernetes cluster</h2>
 
-<li>fill with info</li>
-<li>fill with info</li>
+<p>It's recommended to upgrade your k8s cluster often. Let's discuss how to upgrade your cluster</p>
 
-<h3> fill with question</h3>
+<li> Upgrade master components: apiserver, controller-manager, scheduler</li>
+<li> Upgrade worker components: kubelet, kube-proxy</li>
+<li> Components should use the same minor version as api server (You can have one minor version below, but recommendation is to have them all at the same minor version)</li>
+
+<p> Steps for upgrading your nodes <p>
+<li>kubectl drain: safely evict all pods from the nodes and to mark node as SchedulingDisabled (you can also use kubectl cordon to mark a node as unschedulable)</li> 
+<li>After all pods have been evicted, then do the upgrades on the node</li>
+<li>Lastly, run kubectl uncordon to remark the node as schedulable (SchedulingDisabled reverted)</li>
+
+<h3> Upgrade our cluster (control plane & nodes)</h3>
+
+<p> Since you can use the kubernetes.io doc page, I would advise to use this link below to upgrade your kubeadm cluster. I would practice this.</p>
+<li>https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/</li>
+
+
+<h3>Upgrade your kubernetes cluster to use version 1.22</h3>
 
 <details><summary>Answer</summary>
 
 ```bash
-#replace with answers
+#follow steps in this link: https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
 ```
 
 </details>
