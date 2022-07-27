@@ -2,7 +2,7 @@
     "title": "Practice Exam 1",
     "description": "Here you'll find a list of tasks that will prepare you for the CKS Exam.",
     "backend": {
-      "imageid": "kubernetes-kubeadm-2nodes"
+      "imageid": "kubernetes-cluster-running:1.22"
     },
     "details": {
       "intro": {
