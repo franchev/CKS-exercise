@@ -2,6 +2,21 @@
     "title": "Practice Exam 1",
     "description": "Here you'll find a list of tasks that will prepare you for the CKS Exam.",
     "backend": {
-      "imageid": "ubuntu"
+      "imageid": "kubernetes-kubeadm-2nodes"
+    },
+    "details": {
+      "intro": {
+        "text": "intro.md"
+      },
+      "steps": [
+        {
+          "title": "Create a pod",
+          "text": "step1/text.md",
+          "verify": "step1/verify.sh"
+        }
+      ],
+      "finish": {
+        "text": "finish.md"
+      }
     }
 }
